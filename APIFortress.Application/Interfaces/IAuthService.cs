@@ -7,6 +7,6 @@ namespace ApiFortress.Application.Interfaces
         Task<LoginResponseDTO> AuthenticateUserAsync(LoginRequestDTO loginRequest);
         Task<UserDTO> RegisterUserAsync(RegisterUserDTO registerUser);
         Task LogoutAsync(int userId);
-        Task<LoginResponseDTO> RefreshTokenAsync(string refreshToken);
+        Task<LoginResponseDTO> RefreshTokenAsync(RefreshTokenDTO tokenDto);
     }
 }

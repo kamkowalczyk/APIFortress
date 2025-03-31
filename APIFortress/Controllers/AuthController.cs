@@ -32,9 +32,9 @@ namespace ApiiFortress.Controllers
         }
 
         [HttpPost("Refresh")]
-        public async Task<IActionResult> Refresh([FromBody] string refreshToken)
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenDTO tokenDto)
         {
-            var result = await _authService.RefreshTokenAsync(refreshToken);
+            var result = await _authService.RefreshTokenAsync(tokenDto);
             if (result == null)
                 return Unauthorized("Invalid refresh token");
             return Ok(result);

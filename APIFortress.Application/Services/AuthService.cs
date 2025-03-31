@@ -49,7 +49,6 @@ namespace ApiFortress.Application.Services
             {
                 Username = registerUser.Username,
                 PublicKey = registerUser.PublicKey
-                // Tutaj możesz dodać inne właściwości, np. Email, Forename, Surename, jeśli encja APIUser je posiada.
             };
 
             await _userRepository.AddAsync(newUser);
@@ -65,31 +64,25 @@ namespace ApiFortress.Application.Services
 
         public async Task LogoutAsync(int userId)
         {
-            // Implementacja wylogowania – np. unieważnienie refresh tokena.
             await Task.CompletedTask;
         }
 
-        public async Task<LoginResponseDTO> RefreshTokenAsync(string refreshToken)
+        public async Task<LoginResponseDTO> RefreshTokenAsync(RefreshTokenDTO tokenDto)
         {
-            try
-            {
-                // Weryfikacja refresh tokena, która zwraca ClaimsPrincipal, jeżeli token jest poprawny
-                var principal = _jwtTokenProvider.ValidateToken(refreshToken);
+ 
+                var principal = _jwtTokenProvider.ValidateToken(tokenDto.RefreshToken);
                 if (principal == null)
                     return null;
 
-                // Odczytujemy identyfikator użytkownika z tokena (claim "sub" lub ClaimTypes.NameIdentifier)
                 var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)
                                   ?? principal.FindFirst(JwtRegisteredClaimNames.Sub);
                 if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
                     return null;
 
-                // Pobieramy użytkownika z bazy danych
                 var user = await _userRepository.GetByIdAsync(userId);
                 if (user == null)
                     return null;
 
-                // Generujemy nowe tokeny na podstawie aktualnych danych użytkownika
                 string newAccessToken = _jwtTokenProvider.GenerateToken(user.Id, user.Username);
                 string newRefreshToken = _jwtTokenProvider.GenerateToken(user.Id, user.Username);
 
@@ -99,12 +92,6 @@ namespace ApiFortress.Application.Services
                     RefreshToken = newRefreshToken,
                     ExpiresIn = 3600
                 };
-            }
-            catch (Exception ex)
-            {
-                // Warto zalogować wyjątek dla celów diagnostycznych
-                return null;
-            }
         }
     }
 }
