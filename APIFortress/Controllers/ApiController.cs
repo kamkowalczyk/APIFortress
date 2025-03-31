@@ -8,13 +8,13 @@ namespace ApiiFortress.Controllers
     [Authorize]
     public class ApiController : ControllerBase
     {
-        [HttpGet("data")]
+        [HttpGet("Data")]
         public IActionResult GetData()
         {
             return Ok(new { message = "This is protected data" });
         }
 
-        [HttpPost("data")]
+        [HttpPost("Data")]
         public IActionResult PostData([FromBody] object data)
         {
             return Ok(new { message = "Data processed successfully" });

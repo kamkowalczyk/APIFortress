@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\APIFortress.Domain\APIFortress.Domain.csproj" />
+    <ProjectReference Include="..\APIFortress.Infrastructure\APIFortress.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

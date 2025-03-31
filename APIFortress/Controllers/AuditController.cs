@@ -16,7 +16,7 @@ namespace ApiiFortress.Controllers
             _auditService = auditService;
         }
 
-        [HttpGet("logs")]
+        [HttpGet("Logs")]
         public async Task<IActionResult> GetLogs()
         {
             var logs = await _auditService.GetAuditLogsAsync();

@@ -1,54 +1,54 @@
 ﻿using ApiFortress.Domain.Entities;
 using ApiFortress.Infrastructure.Repositories.Interfaces;
+using ApiFortress.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace ApiFortress.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly List<APIUser> _users = new List<APIUser>();
+        private readonly ApiFortressDbContext _context;
 
-        public Task AddAsync(APIUser user)
+        public UserRepository(ApiFortressDbContext context)
         {
-            user.Id = _users.Count > 0 ? _users.Max(u => u.Id) + 1 : 1;
-            _users.Add(user);
-            return Task.CompletedTask;
+            _context = context;
         }
 
-        public Task DeleteAsync(int id)
+        public async Task AddAsync(APIUser user)
         {
-            var user = _users.FirstOrDefault(u => u.Id == id);
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
             if (user != null)
-                _users.Remove(user);
-            return Task.CompletedTask;
-        }
-
-        public Task<IEnumerable<APIUser>> GetAllAsync()
-        {
-            return Task.FromResult(_users.AsEnumerable());
-        }
-
-        public Task<APIUser> GetByIdAsync(int id)
-        {
-            var user = _users.FirstOrDefault(u => u.Id == id);
-            return Task.FromResult(user);
-        }
-
-        public Task<APIUser> GetByUsernameAsync(string username)
-        {
-            var user = _users.FirstOrDefault(u => u.Username == username);
-            return Task.FromResult(user);
-        }
-
-        public Task UpdateAsync(APIUser user)
-        {
-            var existingUser = _users.FirstOrDefault(u => u.Id == user.Id);
-            if (existingUser != null)
             {
-                existingUser.Username = user.Username;
-                existingUser.PublicKey = user.PublicKey;
-                existingUser.Roles = user.Roles;
-                existingUser.Permissions = user.Permissions;
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
             }
-            return Task.CompletedTask;
+        }
+
+        public async Task<IEnumerable<APIUser>> GetAllAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
+        public async Task<APIUser> GetByIdAsync(int id)
+        {
+            return await _context.Users.FindAsync(id);
+        }
+
+        public async Task<APIUser> GetByUsernameAsync(string username)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task UpdateAsync(APIUser user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

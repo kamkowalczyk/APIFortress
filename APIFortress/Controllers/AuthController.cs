@@ -15,7 +15,7 @@ namespace ApiiFortress.Controllers
             _authService = authService;
         }
 
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequest)
         {
             var result = await _authService.AuthenticateUserAsync(loginRequest);
@@ -24,14 +24,14 @@ namespace ApiiFortress.Controllers
             return Ok(result);
         }
 
-        [HttpPost("register")]
+        [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDTO registerUser)
         {
             var result = await _authService.RegisterUserAsync(registerUser);
             return Ok(result);
         }
 
-        [HttpPost("refresh")]
+        [HttpPost("Refresh")]
         public async Task<IActionResult> Refresh([FromBody] string refreshToken)
         {
             var result = await _authService.RefreshTokenAsync(refreshToken);
@@ -40,7 +40,7 @@ namespace ApiiFortress.Controllers
             return Ok(result);
         }
 
-        [HttpPost("logout")]
+        [HttpPost("Logout")]
         public async Task<IActionResult> Logout([FromQuery] int userId)
         {
             await _authService.LogoutAsync(userId);

@@ -16,13 +16,13 @@ namespace ApiiFortress.Controllers
             _auditService = auditService;
         }
 
-        [HttpGet("users")]
+        [HttpGet("Users")]
         public IActionResult GetUsers()
         {
             return Ok(new { message = "List of users" });
         }
 
-        [HttpGet("logs")]
+        [HttpGet("Logs")]
         public async Task<IActionResult> GetAuditLogs()
         {
             var logs = await _auditService.GetAuditLogsAsync();

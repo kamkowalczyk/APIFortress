@@ -22,26 +22,42 @@ namespace ApiFortress.Infrastructure.Providers
 
         public string GenerateToken(int userId, string username)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            if (userId <= 0 || string.IsNullOrWhiteSpace(username))
+                throw new ArgumentException("Invalid user data provided for token generation.");
 
-            var claims = new[]
+            if (string.IsNullOrWhiteSpace(_secret))
+                throw new InvalidOperationException("JWT Secret is not configured.");
+
+            try
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-                new Claim(JwtRegisteredClaimNames.UniqueName, username),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
+                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-                issuer: _issuer,
-                audience: _audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_expirationInMinutes),
-                signingCredentials: credentials
-            );
+                var claims = new[]
+                {
+            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+            new Claim(JwtRegisteredClaimNames.UniqueName, username),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                var token = new JwtSecurityToken(
+                    issuer: _issuer,
+                    audience: _audience,
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddMinutes(_expirationInMinutes),
+                    signingCredentials: credentials
+                );
+
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            catch (Exception ex)
+            {
+                // Możesz tutaj zalogować szczegóły błędu (np. przy użyciu loggera)
+                throw new Exception("Error generating JWT token: " + ex.Message, ex);
+            }
         }
+
+
 
         public ClaimsPrincipal ValidateToken(string token)
         {
