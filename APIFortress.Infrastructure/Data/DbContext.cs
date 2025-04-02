@@ -15,6 +15,8 @@ namespace ApiFortress.Infrastructure.Data
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<AuditDetails> AuditDetails { get; set; }
 
+        public DbSet<DataItem> DataItems { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -58,6 +60,14 @@ namespace ApiFortress.Infrastructure.Data
                     new { UsersId = 4, RolesId = 2 },
                     new { UsersId = 5, RolesId = 2 }
                 ));
+
+            modelBuilder.Entity<DataItem>().HasData(
+            new DataItem { Id = 1, Title = "Security Policy", Description = "Current API security policies and guidelines." },
+            new DataItem { Id = 2, Title = "Incident Report", Description = "Report detailing recent unauthorized access attempts." },
+            new DataItem { Id = 3, Title = "Audit Summary", Description = "Summary of recent audit logs." },
+            new DataItem { Id = 4, Title = "User Access Report", Description = "Overview of user access levels and activity." },
+            new DataItem { Id = 5, Title = "System Metrics", Description = "Current system performance metrics and statistics." }
+        );
         }
     }
 }
