@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ApiFortress.Application.Interfaces;
+using ApiFortress.Application.DTOs;
+using ApiFortress.Infrastructure.Repositories.Interfaces;
 
 namespace ApiiFortress.Controllers
 {
@@ -10,16 +12,24 @@ namespace ApiiFortress.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAuditService _auditService;
+        private readonly IUserRepository _userRepository;
 
-        public AdminController(IAuditService auditService)
+        public AdminController(IAuditService auditService, IUserRepository userRepository)
         {
             _auditService = auditService;
+            _userRepository = userRepository;
         }
 
         [HttpGet("Users")]
-        public IActionResult GetUsers()
+        public async Task<IActionResult> GetUsers()
         {
-            return Ok(new { message = "List of users" });
+            var users = await _userRepository.GetAllAsync();
+            var userDtos = users.Select(u => new UserDTO
+            {
+                Id = u.Id,
+                Username = u.Username
+            });
+            return Ok(userDtos);
         }
 
         [HttpGet("Logs")]

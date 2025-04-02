@@ -7,6 +7,6 @@
         public string Email { get; set; }
         public string Forename { get; set; }
 
-        public string Surename { get; set; }
+        public string Surname { get; set; }
     }
 }

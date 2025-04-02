@@ -18,8 +18,7 @@ namespace ApiFortress.Infrastructure.Middleware
         {
        
                 await _next(context);
-            
-        
+ 
         }
     }
 }

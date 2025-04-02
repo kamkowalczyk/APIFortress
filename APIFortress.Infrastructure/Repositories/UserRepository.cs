@@ -42,7 +42,9 @@ namespace ApiFortress.Infrastructure.Repositories
 
         public async Task<APIUser> GetByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _context.Users
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task UpdateAsync(APIUser user)

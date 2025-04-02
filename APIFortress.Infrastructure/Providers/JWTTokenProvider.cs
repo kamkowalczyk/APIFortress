@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
@@ -19,8 +20,7 @@ namespace ApiFortress.Infrastructure.Providers
             _audience = audience;
             _expirationInMinutes = expirationInMinutes;
         }
-
-        public string GenerateToken(int userId, string username)
+        public string GenerateToken(int userId, string username, string role = null)
         {
             if (userId <= 0 || string.IsNullOrWhiteSpace(username))
                 throw new ArgumentException("Invalid user data provided for token generation.");
@@ -35,15 +35,21 @@ namespace ApiFortress.Infrastructure.Providers
 
                 var claims = new[]
                 {
-            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-            new Claim(JwtRegisteredClaimNames.UniqueName, username),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+                    new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                    new Claim(JwtRegisteredClaimNames.UniqueName, username),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                };
+
+                var claimsList = new List<Claim>(claims);
+                if (!string.IsNullOrWhiteSpace(role))
+                {
+                    claimsList.Add(new Claim(ClaimTypes.Role, role));
+                }
 
                 var token = new JwtSecurityToken(
                     issuer: _issuer,
                     audience: _audience,
-                    claims: claims,
+                    claims: claimsList,
                     expires: DateTime.UtcNow.AddMinutes(_expirationInMinutes),
                     signingCredentials: credentials
                 );
@@ -52,12 +58,9 @@ namespace ApiFortress.Infrastructure.Providers
             }
             catch (Exception ex)
             {
-                // Możesz tutaj zalogować szczegóły błędu (np. przy użyciu loggera)
                 throw new Exception("Error generating JWT token: " + ex.Message, ex);
             }
         }
-
-
 
         public ClaimsPrincipal ValidateToken(string token)
         {

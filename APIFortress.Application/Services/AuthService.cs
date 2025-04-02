@@ -13,11 +13,13 @@ namespace ApiFortress.Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly JWTTokenProvider _jwtTokenProvider;
+        private readonly IAuditService _auditService;
 
-        public AuthService(IUserRepository userRepository, JWTTokenProvider jwtTokenProvider)
+        public AuthService(IUserRepository userRepository, JWTTokenProvider jwtTokenProvider, IAuditService auditService)
         {
             _userRepository = userRepository;
             _jwtTokenProvider = jwtTokenProvider;
+            _auditService = auditService;
         }
 
         public async Task<LoginResponseDTO> AuthenticateUserAsync(LoginRequestDTO loginRequest)
@@ -26,17 +28,19 @@ namespace ApiFortress.Application.Services
             if (user == null || user.PublicKey != loginRequest.PublicKey)
                 return null;
 
-            string accessToken = _jwtTokenProvider.GenerateToken(user.Id, user.Username);
-            string refreshToken = _jwtTokenProvider.GenerateToken(user.Id, user.Username);
+            var mainRole = user.Roles.FirstOrDefault()?.Name;
 
-            var response = new LoginResponseDTO
+            string accessToken = _jwtTokenProvider.GenerateToken(user.Id, user.Username, mainRole);
+            string refreshToken = _jwtTokenProvider.GenerateToken(user.Id, user.Username, mainRole);
+
+            await _auditService.LogEventAsync(user.Id, "User logged in");
+
+            return new LoginResponseDTO
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 ExpiresIn = 3600
             };
-
-            return response;
         }
 
         public async Task<UserDTO> RegisterUserAsync(RegisterUserDTO registerUser)
@@ -52,6 +56,7 @@ namespace ApiFortress.Application.Services
             };
 
             await _userRepository.AddAsync(newUser);
+            await _auditService.LogEventAsync(newUser.Id, "User registered");
 
             var userDto = new UserDTO
             {
@@ -64,6 +69,7 @@ namespace ApiFortress.Application.Services
 
         public async Task LogoutAsync(int userId)
         {
+            await _auditService.LogEventAsync(userId, "User logged out");
             await Task.CompletedTask;
         }
 
@@ -86,7 +92,9 @@ namespace ApiFortress.Application.Services
                 string newAccessToken = _jwtTokenProvider.GenerateToken(user.Id, user.Username);
                 string newRefreshToken = _jwtTokenProvider.GenerateToken(user.Id, user.Username);
 
-                return new LoginResponseDTO
+            await _auditService.LogEventAsync(user.Id, "Token refreshed");
+
+            return new LoginResponseDTO
                 {
                     AccessToken = newAccessToken,
                     RefreshToken = newRefreshToken,
