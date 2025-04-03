@@ -97,6 +97,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseMiddleware<IPBlockMiddleware>();
 app.UseMiddleware<RateLimitingMiddleware>();
+app.UseMiddleware<AnomalyDetectionMiddleware>();
 app.UseMiddleware<JwtMiddleware>();
 
 app.UseAuthentication();
