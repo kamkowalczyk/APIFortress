@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ApiFortress.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +70,7 @@ builder.Services.AddSingleton<RateLimiter>(sp =>
 builder.Services.AddSingleton<IPBlocker>();
 builder.Services.AddSingleton<EncryptionProvider>(sp => new EncryptionProvider(
     appSettings.EncryptionKey, appSettings.EncryptionIV));
+builder.Services.AddSingleton<MetricsTracker>();
 
 
 var app = builder.Build();
@@ -80,6 +82,16 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.Use(async (context, next) =>
+{
+    var metricsTracker = context.RequestServices.GetRequiredService<MetricsTracker>();
+    metricsTracker.IncrementRequestCount();
+    await next();
+});
+
+//var ipBlocker = app.Services.GetRequiredService<IPBlocker>();
+//ipBlocker.BlockIP("::1");
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
